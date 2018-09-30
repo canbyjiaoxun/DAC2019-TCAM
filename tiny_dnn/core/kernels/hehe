@@ -1,0 +1,20 @@
+#include <assert.h>
+#include <random>
+#include <bitset>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+//#define ADDER_ERROR_RATE 0.00001
+//#define MULTI_ERROR_RATE 0.00001
+#ifndef BIT_ERROR
+#define BIT_ERROR
+namespace tiny_dnn {
+namespace kernels {
+int count_adder = 0;
+int max_count_adder = 100000;
+std::poisson_distribution<> pd_adder((int)(1.0/ADDER_ERROR_RATE*32));
+std::random_device rd_adder;
+std::mt19937 gen_adder(rd_adder());
+
+std::random_device rd;
+std::mt19937 gen(rd());
