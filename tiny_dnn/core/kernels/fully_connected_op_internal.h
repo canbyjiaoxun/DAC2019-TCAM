@@ -15,6 +15,100 @@
 namespace tiny_dnn {
 namespace kernels {
 
+//fully layer freq op 
+inline std::map<std::tuple<std::string, std::string>, float> BF4(){
+    std::map<std::tuple<std::string, std::string>, float> freq_pattern; 
+    //write dic 
+    
+    freq_pattern[std::make_tuple("101111100", "001111110")] = -0.09375;
+    freq_pattern[std::make_tuple("001111100", "101111110")] = -0.09375;
+    freq_pattern[std::make_tuple("101111011", "001111110")] = -0.046875;
+    freq_pattern[std::make_tuple("001111100", "001111110")] = 0.09375;
+    freq_pattern[std::make_tuple("101111011", "101111110")] = 0.046875;
+    freq_pattern[std::make_tuple("101111100", "101111110")] = 0.09375;
+    freq_pattern[std::make_tuple("001111011", "101111110")] = -0.046875;
+    freq_pattern[std::make_tuple("001111011", "001111110")] = 0.046875;
+    freq_pattern[std::make_tuple("101111010", "001111110")] = -0.0234375;
+    freq_pattern[std::make_tuple("101111010", "101111110")] = 0.0234375;
+    freq_pattern[std::make_tuple("001111010", "001111110")] = 0.0234375;
+    freq_pattern[std::make_tuple("001111010", "101111110")] = -0.0234375;
+    freq_pattern[std::make_tuple("101111001", "001111110")] = -0.01171875;
+    freq_pattern[std::make_tuple("001111001", "101111110")] = -0.01171875;
+    freq_pattern[std::make_tuple("101111001", "101111110")] = 0.01171875;
+    freq_pattern[std::make_tuple("001111001", "001111110")] = 0.01171875;
+    freq_pattern[std::make_tuple("101111000", "001111110")] = -0.005859375;
+    freq_pattern[std::make_tuple("001111000", "101111110")] = -0.005859375;
+    freq_pattern[std::make_tuple("101111000", "101111110")] = 0.005859375;
+    freq_pattern[std::make_tuple("001111101", "001111110")] = 0.1875;
+    freq_pattern[std::make_tuple("001111000", "001111110")] = 0.005859375;
+    freq_pattern[std::make_tuple("001111101", "101111110")] = -0.1875;
+    freq_pattern[std::make_tuple("001110111", "101111110")] = -0.0029296875;
+    freq_pattern[std::make_tuple("101110110", "001111110")] = -0.00146484375;
+    freq_pattern[std::make_tuple("101111011", "001111101")] = -0.0234375;
+    freq_pattern[std::make_tuple("101111100", "001111101")] = -0.046875;
+    freq_pattern[std::make_tuple("001110111", "001111110")] = 0.0029296875;
+    freq_pattern[std::make_tuple("101111011", "101111101")] = 0.0234375;
+    freq_pattern[std::make_tuple("001111100", "101111101")] = -0.046875;
+    freq_pattern[std::make_tuple("101110111", "101111110")] = 0.0029296875;
+    /*
+    freq_pattern[std::make_tuple("001111100", "001111101")] = 0.046875;
+    freq_pattern[std::make_tuple("101111101", "001111110")] = -0.1875;
+    freq_pattern[std::make_tuple("101111101", "101111110")] = 0.1875;
+    freq_pattern[std::make_tuple("001110110", "001111110")] = 0.00146484375;
+    freq_pattern[std::make_tuple("001111011", "001111101")] = 0.0234375;
+    freq_pattern[std::make_tuple("001111011", "101111101")] = -0.0234375;
+    freq_pattern[std::make_tuple("101111100", "101111101")] = 0.046875;
+    freq_pattern[std::make_tuple("101110111", "001111110")] = -0.0029296875;
+    freq_pattern[std::make_tuple("101111010", "001111101")] = -0.01171875;
+    freq_pattern[std::make_tuple("101110110", "101111110")] = 0.00146484375;
+    freq_pattern[std::make_tuple("001110110", "101111110")] = -0.00146484375;
+    freq_pattern[std::make_tuple("101111010", "101111101")] = 0.01171875;
+    freq_pattern[std::make_tuple("001111010", "001111101")] = 0.01171875;
+    freq_pattern[std::make_tuple("101111011", "001111100")] = -0.01171875;
+    freq_pattern[std::make_tuple("101111011", "101111100")] = 0.01171875;
+    freq_pattern[std::make_tuple("001111010", "101111101")] = -0.01171875;
+    freq_pattern[std::make_tuple("101110100", "001111110")] = -0.0003662109375;
+    freq_pattern[std::make_tuple("001110101", "101111110")] = -0.000732421875;
+    freq_pattern[std::make_tuple("001111100", "101111100")] = -0.0234375;
+    freq_pattern[std::make_tuple("001111100", "001111100")] = 0.0234375;
+    */
+    return freq_pattern; 
+}
+
+//approximate bloom filter for fully layer 
+int hit_fully = 0; 
+int total_fully = 0; 
+inline float check_BV_fully(float op1, float op2) {
+    total_fully ++; 
+    float temp_mul; 
+    std::map<std::tuple<std::string, std::string>, float> freq_pattern;
+    freq_pattern = BF4(); 
+    std::string op1_str = floatToBinary(op1);
+    std::string op2_str = floatToBinary(op2);
+    if (freq_pattern.find(std::make_tuple(op1_str.substr(0,9), op2_str.substr(0,9))) != freq_pattern.end())
+    {
+       hit_fully ++; 
+       temp_mul = freq_pattern[std::make_tuple(op1_str.substr(0,9), op2_str.substr(0,9))];
+       //std::cout << "Hit " << op1 << " * " << op2 << " = " << temp_mul << std::endl; 
+       return temp_mul; 
+    }  
+    else
+    {
+       double decision = (double)rand() / (double)RAND_MAX; 
+       
+       if(decision < 0.001)
+       {
+          temp_mul = -0.09375;  
+          //std::cout << "decision is " << decision << ", temp_mul is " << temp_mul << std::endl;   
+       }
+       
+       else 
+          temp_mul = op1 * op2; 
+       return temp_mul; 
+    }
+}
+
+
 int fully_count = 0;  //initialize a counter; Xun 08/24/17  
 inline void fully_connected_op_internal(const tensor_t &in_data,
                                         const vec_t &W,

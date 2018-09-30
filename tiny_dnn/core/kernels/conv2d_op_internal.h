@@ -282,7 +282,7 @@ inline void conv2d_op_internal(const tensor_t &in_data,
                                const core::conv_params &params,
                                const bool parallelize) {
   conv_count ++; 
-  std::cout << "conv count: " << conv_count << std::endl; 
+  //std::cout << "conv count: " << conv_count << std::endl; 
   //std::cout << "total op: " << total << std::endl; 
   //std::cout << "hit op: "   << hit << std::endl; 
   //initialize profile file 
